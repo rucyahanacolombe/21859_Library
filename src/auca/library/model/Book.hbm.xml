@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated May 10, 2020 10:01:01 PM by Hibernate Tools 4.3.1 -->
+<hibernate-mapping>
+    <class name="auca.library.model.Book" table="BOOK" schema="JAVA" optimistic-lock="version">
+        <id name="bookid" type="string">
+            <column name="BOOKID" length="5" />
+            <generator class="assigned" />
+        </id>
+        <many-to-one name="category" class="auca.library.model.Category" fetch="select">
+            <column name="CID" length="5" />
+        </many-to-one>
+        <property name="title" type="string">
+            <column name="TITLE" length="25" />
+        </property>
+        <property name="publishinghouse" type="string">
+            <column name="PUBLISHINGHOUSE" length="25" />
+        </property>
+        <property name="publishingdate" type="date">
+            <column name="PUBLISHINGDATE" length="7" />
+        </property>
+        <property name="author" type="string">
+            <column name="AUTHOR" length="25" />
+        </property>
+        <property name="pages" type="string">
+            <column name="PAGES" length="4" />
+        </property>
+        <property name="numberofcopies" type="string">
+            <column name="NUMBEROFCOPIES" length="4" />
+        </property>
+        <property name="categoryname" type="string">
+            <column name="CATEGORYNAME" length="25" />
+        </property>
+    </class>
+</hibernate-mapping>

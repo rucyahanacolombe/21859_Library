@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated May 10, 2020 10:01:01 PM by Hibernate Tools 4.3.1 -->
+<hibernate-mapping>
+    <class name="auca.library.model.CheckOut" table="CHECK_OUT" schema="JAVA" optimistic-lock="version">
+        <id name="id" type="integer">
+            <column name="ID" precision="22" scale="0" />
+            <generator class="assigned" />
+        </id>
+        <property name="clientname" type="string">
+            <column name="CLIENTNAME" length="20" />
+        </property>
+        <property name="bookname" type="string">
+            <column name="BOOKNAME" length="20" />
+        </property>
+        <property name="author" type="string">
+            <column name="AUTHOR" length="30" />
+        </property>
+        <property name="returndate" type="date">
+            <column name="RETURNDATE" length="7" />
+        </property>
+        <property name="status" type="string">
+            <column name="STATUS" length="30" />
+        </property>
+    </class>
+</hibernate-mapping>

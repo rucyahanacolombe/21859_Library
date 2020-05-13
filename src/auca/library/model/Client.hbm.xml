@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated May 10, 2020 10:01:01 PM by Hibernate Tools 4.3.1 -->
+<hibernate-mapping>
+    <class name="auca.library.model.Client" table="CLIENT" schema="JAVA" optimistic-lock="version">
+        <id name="regno" type="string">
+            <column name="REGNO" length="5" />
+            <generator class="assigned" />
+        </id>
+        <property name="firstname" type="string">
+            <column name="FIRSTNAME" length="25" />
+        </property>
+        <property name="lastname" type="string">
+            <column name="LASTNAME" length="25" />
+        </property>
+        <property name="address" type="string">
+            <column name="ADDRESS" length="25" />
+        </property>
+        <property name="phoneno" type="string">
+            <column name="PHONENO" length="12" />
+        </property>
+        <property name="clientcategory" type="string">
+            <column name="CLIENTCATEGORY" length="25" />
+        </property>
+        <property name="photo" type="string">
+            <column name="PHOTO" not-null="true" />
+        </property>
+    </class>
+</hibernate-mapping>
