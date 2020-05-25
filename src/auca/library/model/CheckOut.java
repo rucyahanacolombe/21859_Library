@@ -29,7 +29,7 @@ public class CheckOut  implements java.io.Serializable {
         this.id = id;
     }
 
-    public CheckOut(Integer id, String clientname, String bookname, String author, Date returndate, String status) {
+    public CheckOut(Integer id,String clientname, String bookname, String author, Date returndate, String status) {
         this.id = id;
         this.clientname = clientname;
         this.bookname = bookname;
@@ -37,6 +37,8 @@ public class CheckOut  implements java.io.Serializable {
         this.returndate = returndate;
         this.status = status;
     }
+
+    
 
     public Integer getId() {
         return id;

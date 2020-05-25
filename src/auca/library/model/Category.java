@@ -22,11 +22,13 @@ public class Category  implements java.io.Serializable {
     public Category(String cid) {
         this.cid = cid;
     }
-    public Category(String cid, String cname, Set books) {
+    public Category(String cid, String cname) {
        this.cid = cid;
        this.cname = cname;
-       this.books = books;
+       
     }
+
+    
    
     public String getCid() {
         return this.cid;

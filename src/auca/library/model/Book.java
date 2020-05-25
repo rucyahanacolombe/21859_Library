@@ -38,6 +38,20 @@ public class Book  implements java.io.Serializable {
        this.numberofcopies = numberofcopies;
        this.categoryname = categoryname;
     }
+
+    public Book(String bookid, String title, String publishinghouse, Date publishingdate, String author, String pages,String categoryname) {
+       this.bookid = bookid;
+       this.title = title;
+       this.publishinghouse = publishinghouse;
+       this.publishingdate = publishingdate;
+       this.author = author;
+       this.pages = pages;
+       this.categoryname = categoryname;
+       
+    }
+
+   
+  
    
     public String getBookid() {
         return this.bookid;

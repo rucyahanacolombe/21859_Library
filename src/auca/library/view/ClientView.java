@@ -7,11 +7,19 @@ package auca.library.view;
 
 import auca.library.dao.ClientDao;
 import auca.library.model.Client;
+import auca.library.service.IClientService;
 import auca.library.util.HibernateUtil;
 import java.awt.Image;
 import java.io.File;
+import java.rmi.AccessException;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -346,16 +354,54 @@ public class ClientView extends javax.swing.JInternalFrame {
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
 
-        Client c = new Client();
-        Session session=HibernateUtil.getSessionFactory().openSession();
-        Transaction tr = session.beginTransaction();
-        c =(Client) session.get(Client.class, regno.getText());
-        ClientDao cdao = new ClientDao();
-        cdao.DeleteClient(c);
-        JOptionPane.showMessageDialog(this, "data deleted");
-        DefaultTableModel model=(DefaultTableModel) table.getModel();
-        model.setRowCount(0);
-        PopulateClient();
+            /*Client c = new Client();
+            Session session=HibernateUtil.getSessionFactory().openSession();
+            Transaction tr = session.beginTransaction();
+            c =(Client) session.get(Client.class, regno.getText());
+            ClientDao cdao = new ClientDao();
+            cdao.DeleteClient(c);
+            JOptionPane.showMessageDialog(this, "data deleted");
+            DefaultTableModel model=(DefaultTableModel) table.getModel();
+            model.setRowCount(0);
+            PopulateClient();*/
+            /* try {
+            
+            
+            Registry registry = LocateRegistry.getRegistry("localhost", 2222);
+            IClientService clientservice = (IClientService) registry.lookup("clientservice");
+            String a = regno.getText();
+            
+            boolean result = clientservice.delete(a);
+            PopulateClient();
+            System.out.println(result ? "delete succefully" : "error,cant be saved");
+            } catch (RemoteException ex) {
+            Logger.getLogger(ClientView.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (NotBoundException ex) {
+            Logger.getLogger(ClientView.class.getName()).log(Level.SEVERE, null, ex);
+            }*/
+        
+            Client c = new Client();
+            Session session=HibernateUtil.getSessionFactory().openSession();
+            Transaction tr = session.beginTransaction();
+            c =(Client) session.get(Client.class, regno.getText());
+            tr.commit();
+            session.close();
+            try {
+            Registry registry = LocateRegistry.getRegistry("localhost", 2222);
+            IClientService clientservice = (IClientService) registry.lookup("clientservice");
+            clientservice.delete(c);            
+        } catch (RemoteException ex) {
+            Logger.getLogger(ClientView.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NotBoundException ex) {
+            Logger.getLogger(ClientView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+            JOptionPane.showMessageDialog(this, "data deleted");
+            DefaultTableModel model=(DefaultTableModel) table.getModel();
+            model.setRowCount(0);
+            PopulateClient();
+            
+        
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void PopulateClient() {
@@ -375,21 +421,38 @@ public class ClientView extends javax.swing.JInternalFrame {
 
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        // TODO add your handling code here:
-        Client c = new Client();
-        c.setRegno(regno.getText());
-        c.setFirstname(fname.getText());
-        c.setLastname(lname.getText());
-        c.setAddress(address.getText());
-        c.setPhoneno(phone.getText());
-        c.setClientcategory(clientcat.getText());
-        c.setPhoto(passport.getText());
-        c.setPhoto(Filepath);
-        ClientDao cdao = new ClientDao();
-        cdao.UpdateClient(c);
-        PopulateClient();
-        JOptionPane.showMessageDialog(this, "Updated saved");
+        /*Client c = new Client();
+            c.setRegno(regno.getText());
+            c.setFirstname(fname.getText());
+            c.setLastname(lname.getText());
+            c.setAddress(address.getText());
+            c.setPhoneno(phone.getText());
+            c.setClientcategory(clientcat.getText());
+            c.setPhoto(passport.getText());
+            c.setPhoto(Filepath);
+            ClientDao cdao = new ClientDao();
+            cdao.UpdateClient(c);
+            PopulateClient();
+            JOptionPane.showMessageDialog(this, "Updated saved");*/
+        try {
 
+            Registry registry = LocateRegistry.getRegistry("localhost", 2222);
+            IClientService clientservice = (IClientService) registry.lookup("clientservice");
+            String a = regno.getText();
+            String b = fname.getText();
+            String c = lname.getText();
+            String d = phone.getText();
+            String e = address.getText();
+            String f = clientcat.getText();
+            String g = Filepath;
+            PopulateClient();
+            boolean result = clientservice.update(a, b, c, d, e, f, g);
+            System.out.println(result ? "updated succefully" : "error,cant be saved");
+        } catch (RemoteException ex) {
+            Logger.getLogger(ClientView.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NotBoundException ex) {
+            Logger.getLogger(ClientView.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
     }//GEN-LAST:event_jButton3ActionPerformed
 
@@ -413,7 +476,9 @@ public class ClientView extends javax.swing.JInternalFrame {
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
         // TODO add your handling code here:
-        Client cl = new Client();
+
+
+        /*Client cl = new Client();
         cl.setRegno(regno.getText());
         cl.setFirstname(fname.getText());
         cl.setLastname(lname.getText());
@@ -424,7 +489,26 @@ public class ClientView extends javax.swing.JInternalFrame {
         ClientDao cldao = new ClientDao();
         cldao.SaveClient(cl);
         PopulateClient();
-        JOptionPane.showMessageDialog(this, "Saved saved");
+        JOptionPane.showMessageDialog(this, "Saved saved");*/
+ try {
+            Registry registry = LocateRegistry.getRegistry("localhost",2222);
+            IClientService clientservice=(IClientService) registry.lookup("clientservice");
+            String a =regno.getText();
+            String b =fname.getText();
+            String c =lname.getText();
+            String d =phone.getText();
+            String e =address.getText();
+            String f = clientcat.getText();
+            String g =Filepath;
+            boolean result = clientservice.save(a, b, c, d, e, f, g);
+            System.out.println(result?"save succefully":"error,cant be saved");
+            PopulateClient();
+        } catch (RemoteException ex) {
+            Logger.getLogger(ClientView.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NotBoundException ex) {
+            Logger.getLogger(ClientView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }//GEN-LAST:event_jButton5ActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

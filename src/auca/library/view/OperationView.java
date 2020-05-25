@@ -15,17 +15,25 @@ import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import auca.library.model.CheckOut;
+import auca.library.service.ICheckOutService;
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 import static com.sun.org.apache.xalan.internal.xsltc.compiler.util.Type.String;
+import com.toedter.calendar.JDateChooser;
 import java.awt.Image;
 import java.awt.print.PrinterException;
 import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.rmi.AccessException;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -54,6 +62,7 @@ public class OperationView extends javax.swing.JInternalFrame {
         initComponents();
         PopulateCheckOut();
         addToCombo();
+        DateForm();
         // PopulateCheckOut1();
     }
 
@@ -70,6 +79,12 @@ public class OperationView extends javax.swing.JInternalFrame {
             bookcat.addItem(cat.toString());
 
         }
+    }
+
+    public void DateForm() {
+        JDateChooser datechooser = new JDateChooser();
+        datechooser.setDateFormatString("YYYY-MM-dd");
+
     }
 
     private void PopulateCheckOut() {
@@ -731,8 +746,7 @@ public class OperationView extends javax.swing.JInternalFrame {
                 model.addRow(o);
             }
             ses.close();
-        } 
-        else if (out.isSelected()) {
+        } else if (out.isSelected()) {
             st = "Check Out";
             ses = HibernateUtil.getSessionFactory().openSession();
             tr = ses.beginTransaction();
@@ -750,11 +764,10 @@ public class OperationView extends javax.swing.JInternalFrame {
                 o[3] = ch.getReturndate();
                 o[4] = ch.getStatus();
                 model.addRow(o);
-            }                       
-            ses.close();     
-            
-        } 
-         else if (fromd.getDate() == null) {
+            }
+            ses.close();
+
+        } else if (tod.getDate() == null) {
             String id = null;
             String i = null;
             String rnm = null;
@@ -768,8 +781,8 @@ public class OperationView extends javax.swing.JInternalFrame {
             for (Object obj : temp) {
                 id = obj.toString();
             }
-              i =id;
-              
+            i = id;
+
             SQLQuery query2 = ses.createSQLQuery("select cname  from Category where cid =?");
             query2.setParameter(0, i);
             List temp2 = query.list();
@@ -791,9 +804,8 @@ public class OperationView extends javax.swing.JInternalFrame {
                 rows[4] = op.getStatus();
                 mdOut.addRow(rows);
             }
-            ses.close();   
-        }
-        else {
+            ses.close();
+        } else {
             Date from = fromd.getDate();
             Date to = tod.getDate();
             ses = HibernateUtil.getSessionFactory().openSession();
@@ -815,9 +827,7 @@ public class OperationView extends javax.swing.JInternalFrame {
                 model.addRow(o);
             }
             ses.close();
-
         }
-        
 
 
     }//GEN-LAST:event_jButton1ActionPerformed
@@ -928,33 +938,73 @@ public class OperationView extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_SearchActionPerformed
 
     private void CheckOut1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CheckOut1ActionPerformed
-        // TODO add your handling code here:
-        CheckOut chout = new CheckOut();
-        chout.setId(1);
-        chout.setClientname(name.getText());
-        chout.setBookname(bname.getText());
-        chout.setAuthor(author.getText());
-        chout.setReturndate(date.getDate());
-        chout.setStatus("Check In");
-        CheckOutDao choutdao = new CheckOutDao();
-        choutdao.SaveCheckOut(chout);
-        PopulateCheckOut();
-        JOptionPane.showMessageDialog(this, "Data saved");
+        try {
+            
+            
+            Registry registry = LocateRegistry.getRegistry("localhost", 2222);
+            ICheckOutService checkoutservice = (ICheckOutService) registry.lookup("checkoutservice");
+            int x= 1;
+            String a = name.getText();
+            String b = bname.getText();
+            String c = author.getText();
+            
+            Date d = (new Date(date.getDate().getTime()));
+            String e = "Check In";
+            boolean result = checkoutservice.save(x,a, b, c, d, e);
+            System.out.println(result ? "saved succefully" : "error,cant be saved");
+            PopulateCheckOut();
+// TODO add your handling code here:
+
+
+            /* CheckOut chout = new CheckOut();
+chout.setId(1);
+chout.setClientname(name.getText());
+chout.setBookname(bname.getText());
+chout.setAuthor(author.getText());
+chout.setReturndate(date.getDate());
+chout.setStatus("Check In");
+CheckOutDao choutdao = new CheckOutDao();
+choutdao.SaveCheckOut(chout);
+PopulateCheckOut();
+JOptionPane.showMessageDialog(this, "Data saved");*/
+        } catch (RemoteException ex) {
+            Logger.getLogger(OperationView.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NotBoundException ex) {
+            Logger.getLogger(OperationView.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_CheckOut1ActionPerformed
 
     private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
-        // TODO add your handling code here:
-        CheckOut chout = new CheckOut();
-        chout.setId(1);
-        chout.setClientname(name.getText());
-        chout.setBookname(bname.getText());
-        chout.setAuthor(author.getText());
-        chout.setReturndate(date.getDate());
-        chout.setStatus("Check Out");
-        CheckOutDao choutdao = new CheckOutDao();
-        choutdao.SaveCheckOut(chout);
-        PopulateCheckOut();
-        JOptionPane.showMessageDialog(this, "Data saved");
+        try {
+            // TODO add your handling code here:
+            /*CheckOut chout = new CheckOut();
+            chout.setId(1);
+            chout.setClientname(name.getText());
+            chout.setBookname(bname.getText());
+            chout.setAuthor(author.getText());
+            chout.setReturndate(date.getDate());
+            chout.setStatus("Check Out");
+            CheckOutDao choutdao = new CheckOutDao();
+            choutdao.SaveCheckOut(chout);
+            PopulateCheckOut();
+            JOptionPane.showMessageDialog(this, "Data saved");*/
+            
+            Registry registry = LocateRegistry.getRegistry("localhost", 2222);
+            ICheckOutService checkoutservice = (ICheckOutService) registry.lookup("checkoutservice");
+            int x= 1;
+            String a = name.getText();
+            String b = bname.getText();
+            String c = author.getText();
+            Date d = (new Date(date.getDate().getTime()));
+            String e = "Check Out";
+            boolean result = checkoutservice.save(x,a, b, c, d, e);
+            System.out.println(result ? "saved succefully" : "error,cant be saved");
+            PopulateCheckOut();
+        } catch (RemoteException ex) {
+            Logger.getLogger(OperationView.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NotBoundException ex) {
+            Logger.getLogger(OperationView.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_jButton7ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
@@ -997,7 +1047,7 @@ public class OperationView extends javax.swing.JInternalFrame {
                 table.addCell(author);
                 table.addCell(returndate);
                 table.addCell(status);
-                
+
             }
             doc.add(table);
         } catch (FileNotFoundException ex) {

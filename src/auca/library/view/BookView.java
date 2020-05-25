@@ -9,10 +9,23 @@ import auca.library.dao.BookDao;
 import auca.library.dao.CategoryDao;
 import auca.library.model.Book;
 import auca.library.model.Category;
+import auca.library.service.IBookCategoryService;
+import auca.library.service.IBookService;
+import auca.library.service.IClientService;
 import auca.library.util.HibernateUtil;
+import com.toedter.calendar.JDateChooser;
+import java.rmi.AccessException;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.List;
 import java.sql.Date;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import org.hibernate.Criteria;
@@ -34,8 +47,10 @@ public class BookView extends javax.swing.JInternalFrame {
         addToCombo();
         PopulateBook();
         PopulateCategory();
+        DateForm();
 
     }
+
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -56,19 +71,25 @@ public class BookView extends javax.swing.JInternalFrame {
 
         }
     }
-    private void PopulateCategory(){
-        CategoryDao cdao= new CategoryDao();
-        List<Category> cl=cdao.getCategory();
-        String[] col ={"Category Id","Category Name"};
-        DefaultTableModel  tm=(DefaultTableModel) tablecat.getModel();
+    public void DateForm(){
+        JDateChooser datechooser = new JDateChooser();
+        datechooser.setDateFormatString("YYYY-MM-dd");
+        
+    
+    }
+
+    private void PopulateCategory() {
+        CategoryDao cdao = new CategoryDao();
+        List<Category> cl = cdao.getCategory();
+        String[] col = {"Category Id", "Category Name"};
+        DefaultTableModel tm = (DefaultTableModel) tablecat.getModel();
         tm.setRowCount(0);
         tm.setColumnIdentifiers(col);
-        for(Iterator iter =cl.iterator();iter.hasNext();){
-            Category c =(Category) iter.next();
-            Object [] client = {c.getCid(),c.getCname()};
+        for (Iterator iter = cl.iterator(); iter.hasNext();) {
+            Category c = (Category) iter.next();
+            Object[] client = {c.getCid(), c.getCname()};
             tm.addRow(client);
-            
-        
+
         }
     }
 
@@ -548,65 +569,147 @@ public class BookView extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_phousephouseActionPerformed
 
     private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
-        Book b = new Book();
-        b.setBookid(bid.getText());
-        b.setTitle(title.getText());
-        b.setPublishinghouse(phouse.getText());
-        b.setPublishingdate(new Date(pdate.getDate().getTime()));
-        b.setAuthor(author.getText());
-        b.setPages(pages.getText());
-       
-       
-         String id=null;
-        String name = clientcat.getSelectedItem().toString();
-        Transaction tr =null;
-        Session ses = HibernateUtil.getSessionFactory().openSession(); 
-        tr =ses.beginTransaction();
-        Criteria Bookcat = ses.createCriteria(Category.class);
-        SQLQuery query = ses.createSQLQuery("select cid from Category where cname=?");
-         query.setParameter(0, name);
-          List temp = query.list();
-           for (Object obj : temp) {
-                id = obj.toString();
+        /*Book b = new Book();
+            b.setBookid(bid.getText());
+            b.setTitle(title.getText());
+            b.setPublishinghouse(phouse.getText());
+            b.setPublishingdate(new Date(pdate.getDate().getTime()));
+            b.setAuthor(author.getText());
+            b.setPages(pages.getText());
+            
+            String id = null;
+            String name = clientcat.getSelectedItem().toString();
+            Transaction tr = null;
+            Session ses = HibernateUtil.getSessionFactory().openSession();
+            tr = ses.beginTransaction();
+            Criteria Bookcat = ses.createCriteria(Category.class);
+            SQLQuery query = ses.createSQLQuery("select cid from Category where cname=?");
+            query.setParameter(0, name);
+            List temp = query.list();
+            for (Object obj : temp) {
+            id = obj.toString();
             }
-        ses.close();
+            ses.close();
             b.setCategoryname(id);
-                   
-        BookDao bdao = new BookDao();
-        bdao.SaveBook(b);
-        PopulateBook();
-        JOptionPane.showMessageDialog(this, "data saved");
+            
+            BookDao bdao = new BookDao();
+            bdao.SaveBook(b);
+            PopulateBook();
+            JOptionPane.showMessageDialog(this, "data saved");*/
+            
+            
+            
+        try {
+            
+           Registry registry = LocateRegistry.getRegistry("localhost", 2222);
+            IBookService bookservice = (IBookService) registry.lookup("bookservice");
+            
+            String a = bid.getText();
+            String b = title.getText();
+            String c = phouse.getText();
+            Date d=(new Date(pdate.getDate().getTime()));
+            String e = author.getText();
+            String f = pages.getText();
+            String id = null;
+            String name = clientcat.getSelectedItem().toString();
+            Transaction tr = null;
+            Session ses = HibernateUtil.getSessionFactory().openSession();
+            tr = ses.beginTransaction();
+            Criteria Bookcat = ses.createCriteria(Category.class);
+            SQLQuery query = ses.createSQLQuery("select cid from Category where cname=?");
+            query.setParameter(0, name);
+            List temp = query.list();
+            for (Object obj : temp) {
+            id = obj.toString();
+            }
+            ses.close();
+            String x=id;
+                       
+            boolean result = bookservice.save(a,b,c,d, e,f,x);
+            System.out.println(result ? "saved succefully" : "error,cant be saved");
+            PopulateBook();
+        } catch (RemoteException ex) {
+            Logger.getLogger(BookView.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NotBoundException ex) {
+            Logger.getLogger(BookView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+       
 
     }//GEN-LAST:event_jButton7ActionPerformed
 
     private void jButton8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton8ActionPerformed
 
-        Book b = new Book();
-        Session session=HibernateUtil.getSessionFactory().openSession();
-        Transaction tr = session.beginTransaction();
-        b =(Book) session.get(Book.class, bid.getText());
-         BookDao bdao = new BookDao();
-        bdao.DeleteBook(b);
-        JOptionPane.showMessageDialog(this, "data deleted");
-        DefaultTableModel model=(DefaultTableModel) table.getModel();
-        model.setRowCount(0);
-        PopulateBook();
-       
+        try {
+            Registry registry = LocateRegistry.getRegistry("localhost", 2222);
+            IBookService bookservice = (IBookService) registry.lookup("bookservice");
+            String a = bid.getText();
+            boolean result = bookservice.delete(a);
+            PopulateBook();
+            System.out.println(result ? "delete succefully" : "error,cant be saved");
+            /*Book b = new Book();
+            Session session = HibernateUtil.getSessionFactory().openSession();
+            Transaction tr = session.beginTransaction();
+            b = (Book) session.get(Book.class, bid.getText());
+            BookDao bdao = new BookDao();
+            bdao.DeleteBook(b);
+            JOptionPane.showMessageDialog(this, "data deleted");
+            DefaultTableModel model = (DefaultTableModel) table.getModel();
+            model.setRowCount(0);
+            PopulateBook();*/
+        } catch (RemoteException ex) {
+            Logger.getLogger(BookView.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NotBoundException ex) {
+            Logger.getLogger(BookView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }//GEN-LAST:event_jButton8ActionPerformed
 
     private void jButton9ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton9ActionPerformed
         // TODO add your handling code here:
-        Book b = new Book();
-        b.setBookid(bid.getText());
-        b.setTitle(title.getText());
-        b.setPublishinghouse(phouse.getText());
-        b.setPublishingdate(new Date(pdate.getDate().getTime()));
-        b.setAuthor(author.getText());
-        b.setPages(pages.getText());
-        BookDao bdao = new BookDao();
-        bdao.UpdateBook(b);
-        PopulateBook();
-        JOptionPane.showMessageDialog(this, "Updated saved");
+            /* Book b = new Book();
+            b.setBookid(bid.getText());
+            b.setTitle(title.getText());
+            b.setPublishinghouse(phouse.getText());
+            b.setPublishingdate(new Date(pdate.getDate().getTime()));
+            b.setAuthor(author.getText());
+            b.setPages(pages.getText());
+            BookDao bdao = new BookDao();
+            bdao.UpdateBook(b);
+            PopulateBook();
+            JOptionPane.showMessageDialog(this, "Updated saved");*/
+        try {
+            
+            Registry registry = LocateRegistry.getRegistry("localhost", 2222);
+            IBookService bookservice = (IBookService) registry.lookup("bookservice");
+            String a = bid.getText();
+            String b = title.getText();
+            String c = phouse.getText();
+            Date d =(new Date(pdate.getDate().getTime()));
+            String e = author.getText();
+            String f = pages.getText();
+            String id = null;
+            String name = clientcat.getSelectedItem().toString();
+            Transaction tr = null;
+            Session ses = HibernateUtil.getSessionFactory().openSession();
+            tr = ses.beginTransaction();
+            Criteria Bookcat = ses.createCriteria(Category.class);
+            SQLQuery query = ses.createSQLQuery("select cid from Category where cname=?");
+            query.setParameter(0, name);
+            List temp = query.list();
+            for (Object obj : temp) {
+                id = obj.toString();
+            }
+            ses.close();
+            String x=id;
+                       
+            boolean result = bookservice.update(a,b,c,d, e,f,x);
+            System.out.println(result ? "updated succefully" : "error,cant be saved");
+            PopulateBook();
+        } catch (RemoteException ex) {
+            Logger.getLogger(BookView.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NotBoundException ex) {
+            Logger.getLogger(BookView.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_jButton9ActionPerformed
 
     private void jTabbedPane1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTabbedPane1MouseClicked
@@ -618,40 +721,80 @@ public class BookView extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_idActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        Category ct = new Category();
-        ct.setCid(id.getText());
-        ct.setCname(catname.getText());
-        CategoryDao catdao = new CategoryDao();
-        catdao.SaveCategory(ct);
-        PopulateCategory();
-        JOptionPane.showMessageDialog(this, "Data saved");
-        
+
+        /*Category ct = new Category();
+            ct.setCid(id.getText());
+            ct.setCname(catname.getText());
+            CategoryDao catdao = new CategoryDao();
+            catdao.SaveCategory(ct);
+            PopulateCategory();
+            JOptionPane.showMessageDialog(this, "Data saved");*/
+        try {
+            Registry registry = LocateRegistry.getRegistry("localhost", 2222);
+            IBookCategoryService categoryservice = (IBookCategoryService) registry.lookup("bookcategoryservice");
+            String a = id.getText();
+            String b = catname.getText();
+            boolean result = categoryservice.save(a, b);
+            System.out.println(result ? "saved succefully" : "error,cant be saved");
+        } catch (RemoteException ex) {
+            Logger.getLogger(BookView.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NotBoundException ex) {
+            Logger.getLogger(BookView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:        /*Category ct = new Category();
+        /*Category ct = new Category(id.getText());
+            
+            CategoryDao cdao = new CategoryDao();
+            cdao.DeleteCategory(ct);
+            JOptionPane.showMessageDialog(this, "data deleted");
+            
+            DefaultTableModel model = (DefaultTableModel) tablecat.getModel();
+            model.setRowCount(0);
+            PopulateCategory();*/
+        try {
+            // TODO add your handling code here:        /*Category ct = new Category();
+            Registry registry = LocateRegistry.getRegistry("localhost", 2222);
+            IBookCategoryService categoryservice = (IBookCategoryService) registry.lookup("bookcategoryservice");
+            String a = id.getText();
+            boolean result = categoryservice.delete(a);
+            PopulateCategory();
+            System.out.println(result ? "delete succefully" : "error,cant be saved");
 
-        Category ct = new Category(id.getText());     
-      
-        CategoryDao cdao = new CategoryDao();
-        cdao.DeleteCategory(ct);
-        JOptionPane.showMessageDialog(this, "data deleted");
-        
-        DefaultTableModel model=(DefaultTableModel) tablecat.getModel();
-        model.setRowCount(0);
-        PopulateCategory();
+        } catch (RemoteException ex) {
+            Logger.getLogger(BookView.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NotBoundException ex) {
+            Logger.getLogger(BookView.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        // TODO add your handling code here:
-        Category ct = new Category();
-        ct.setCid(id.getText());
-        ct.setCname(catname.getText());
-        CategoryDao catdao = new CategoryDao();
-        catdao.SaveCategory(ct);
-        JOptionPane.showMessageDialog(this, "Updated saved");
-        PopulateCategory();
+
+        /*        // TODO add your handling code here:
+            Category ct = new Category();
+            ct.setCid(id.getText());
+            ct.setCname(catname.getText());
+            CategoryDao catdao = new CategoryDao();
+            catdao.SaveCategory(ct);
+            JOptionPane.showMessageDialog(this, "Updated saved");
+            PopulateCategory();*/
+        try {
+            Registry registry = LocateRegistry.getRegistry("localhost", 2222);
+            IBookCategoryService categoryservice = (IBookCategoryService) registry.lookup("bookcategoryservice");
+            String a = id.getText();
+            String b = catname.getText();
+            boolean result = categoryservice.update(a, b);
+            PopulateCategory();
+            System.out.println(result ? "update succefully" : "error,cant be saved");
+
+        } catch (RemoteException ex) {
+            Logger.getLogger(BookView.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NotBoundException ex) {
+            Logger.getLogger(BookView.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void clientcatMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_clientcatMousePressed
